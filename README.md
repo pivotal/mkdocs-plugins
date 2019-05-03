@@ -15,10 +15,10 @@
    
 3. Add to the list of plugins in `mkdocs.yml`
 
-  ```yaml
-  plugins:
-  - jinja2: {}
-  ```
+   ```yaml
+   plugins:
+   - jinja2: {}
+   ```
   
 4. Enjoy with `mkdocs serve`.
 
