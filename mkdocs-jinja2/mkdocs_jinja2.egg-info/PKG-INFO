@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: mkdocs-jinja2
+Version: 0.0.1
+Summary: Uses jinja2 and file system loader (for include and partials)
+Home-page: UNKNOWN
+Author: JT Archie
+Author-email: jarchie@pivotal
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN

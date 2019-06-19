@@ -1,0 +1,3 @@
+[mkdocs.plugins]
+jinja2 = mkdocs_jinja2:JinjaMkDocPlugin
+

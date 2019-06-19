@@ -21,14 +21,19 @@ class CodeSnippetExtension(Extension):
     def parse(self, parser):
         lineno = next(parser.stream).lineno
         args = [parser.parse_expression()]
+        
         parser.stream.skip_if('comma')
         args.append(parser.parse_expression())
+        
+        if parser.stream.skip_if('comma'):
+            args.append(parser.parse_expression())
+
         return nodes.Output([
             self.call_method('_code_snippet', args, lineno=lineno)
             ], lineno=lineno)
 
 
-    def _code_snippet(self, repo_name, code_name):
+    def _code_snippet(self, repo_name, code_name, tab_name = ''):
         if self.environment.dependent_sections.get(repo_name):
             repo = self.environment.dependent_sections[repo_name]
             root = os.path.abspath(repo)
@@ -48,11 +53,17 @@ class CodeSnippetExtension(Extension):
                     f = open(path, 'r')
                     matches = finder.findall(f.read(), overlapped=True)
                     for match in matches:
-                        snippets[match[0]] = """\n\n```%s\n%s\n```\n\n""" % (match[1], match[2])
+                        name, syntax, contents = match
+                        snippets[name] = (syntax, contents)
+                        
                 self.environment.code_snippets[repo_name] = snippets
 
             if code_name in self.environment.code_snippets[repo_name]:
-                return self.environment.code_snippets[repo_name][code_name]
+                (syntax, contents) = self.environment.code_snippets[repo_name][code_name]
+                if len(tab_name) > 0:
+                    return """\n\n```%s tab="%s"\n%s\n```\n\n""" % (syntax, tab_name, contents)
+                else:
+                    return """\n\n```%s\n%s\n```\n\n""" % (syntax, contents)
 
             raise TemplateRuntimeError('could not find code snippet "%s" under repo "%s" -- please check for "rg" or entry in ".gitignore"' % (code_name, repo_name))
         else:

@@ -1,0 +1,8 @@
+setup.py
+mkdocs_jinja2/__init__.py
+mkdocs_jinja2.egg-info/PKG-INFO
+mkdocs_jinja2.egg-info/SOURCES.txt
+mkdocs_jinja2.egg-info/dependency_links.txt
+mkdocs_jinja2.egg-info/entry_points.txt
+mkdocs_jinja2.egg-info/requires.txt
+mkdocs_jinja2.egg-info/top_level.txt

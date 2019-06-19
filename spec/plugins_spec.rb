@@ -3,6 +3,7 @@
 require 'spec_helper'
 require 'tmpdir'
 require 'yaml'
+require 'nokogiri'
 
 RSpec.describe 'mkdocs plugins' do
   let(:output_dir) { Dir.mktmpdir }
@@ -21,6 +22,7 @@ RSpec.describe 'mkdocs plugins' do
       config = YAML.load_file(config_file)
       config['plugins'] ||= [{ 'jinja2' => additional_config }]
       config['use_directory_urls'] = false
+      config['markdown_extensions'] = ['pymdownx.superfences']
       File.write(config_file, YAML.dump(config))
     end
 
@@ -82,7 +84,33 @@ RSpec.describe 'mkdocs plugins' do
         write_doc 'test.md', "code here: {% code_snippet 'repo-name', 'snippet-name' %}\nsome extra copy to ensure newlines"
         create_site
 
-        expect(read_doc('test.html')).to include(%Q{\n<pre><code class="yaml">some: yaml\n</code></pre>\n\n})
+        doc = Nokogiri::HTML(read_doc('test.html'))
+        expect(doc.css('.highlight').text).to eq "some: yaml\n"
+      end
+
+      it 'supports tabbing' do
+        create_docs(
+          'dependent_sections' => {
+            'repo-name' => repo_dir
+          }
+        )
+
+        Dir.chdir(repo_dir) do
+          system('git init')
+          File.write('testing.go', <<~SNIPPET)
+            # code_snippet snippet-name start yaml
+            some: yaml
+            # code_snippet snippet-name end
+          SNIPPET
+          system('git add -A && git commit -mok')
+        end
+
+        write_doc 'test.md', "code here: {% code_snippet 'repo-name', 'snippet-name', 'Tab Name' %}\nsome extra copy to ensure newlines"
+        create_site
+
+        doc = Nokogiri::HTML(read_doc('test.html'))
+        expect(doc.css('.superfences-tabs .superfences-content').size).to eq 1
+        expect(doc.css('.superfences-tabs label').text).to eq 'Tab Name'
       end
     end
   end
