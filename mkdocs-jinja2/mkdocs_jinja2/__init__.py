@@ -4,6 +4,7 @@ from jinja2 import Environment, FileSystemLoader, lexer, nodes, TemplateRuntimeE
 from jinja2.ext import Extension
 from mkdocs import plugins, config
 import os
+import re
 import regex
 import subprocess
 
@@ -54,6 +55,7 @@ class CodeSnippetExtension(Extension):
                     matches = finder.findall(f.read(), overlapped=True)
                     for match in matches:
                         name, syntax, contents = match
+                        contents = re.sub(r"""# code_snippet.*$\n""", '', contents, 0, regex.MULTILINE)
                         snippets[name] = (syntax, contents)
                         
                 self.environment.code_snippets[repo_name] = snippets
