@@ -100,7 +100,7 @@ RSpec.describe 'mkdocs plugins' do
           File.write('testing.go', <<~SNIPPET)
             # code_snippet snippet-name start yaml
             some_other: yaml
-            # code_snippet nested-snippet-name start yaml
+                  # code_snippet nested-snippet-name start yaml
             some: yaml
             # code_snippet nested-snippet-name end
             even: more yaml
