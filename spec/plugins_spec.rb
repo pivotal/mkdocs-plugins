@@ -116,6 +116,30 @@ RSpec.describe 'mkdocs plugins' do
         expect(doc.css('.highlight').text).to eq "some_other: yaml\nsome: yaml\neven: more yaml\n"
       end
 
+      it 'dedents blocks to the left' do
+        create_docs(
+            'dependent_sections' => {
+                'repo-name' => repo_dir
+            }
+        )
+
+        Dir.chdir(repo_dir) do
+          system('git init')
+          File.write('testing.go', <<-SNIPPET)
+            # code_snippet snippet-name start yaml
+            some: yaml
+            # code_snippet snippet-name end
+          SNIPPET
+          system('git add -A && git commit -mok')
+        end
+
+        write_doc 'test.md', "code here: {% code_snippet 'repo-name', 'snippet-name', 'Tab Name' %}\nsome extra copy to ensure newlines"
+        create_site
+
+        doc = Nokogiri::HTML(read_doc('test.html'))
+        expect(doc.css('.highlight').text).to eq "some: yaml\n"
+      end
+
       it 'supports tabbing' do
         create_docs(
           'dependent_sections' => {

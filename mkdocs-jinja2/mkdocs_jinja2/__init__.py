@@ -7,6 +7,7 @@ import os
 import re
 import regex
 import subprocess
+import textwrap
 
 
 class CodeSnippetExtension(Extension):
@@ -55,7 +56,7 @@ class CodeSnippetExtension(Extension):
                     matches = finder.findall(f.read(), overlapped=True)
                     for match in matches:
                         name, syntax, contents = match
-                        contents = re.sub(r"""^\s*# code_snippet.*$\n?""", '', contents, 0, regex.MULTILINE)
+                        contents = textwrap.dedent(re.sub(r"""^\s*# code_snippet.*$\n?""", '', contents, 0, regex.MULTILINE))
                         snippets[name] = (syntax, contents)
                         
                 self.environment.code_snippets[repo_name] = snippets
