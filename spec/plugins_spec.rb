@@ -161,8 +161,8 @@ RSpec.describe 'mkdocs plugins' do
         create_site
 
         doc = Nokogiri::HTML(read_doc('test.html'))
-        expect(doc.css('.superfences-tabs .superfences-content').size).to eq 1
-        expect(doc.css('.superfences-tabs label').text).to eq 'Tab Name'
+        expect(doc.css('.tabbed-set .tabbed-content').size).to eq 1
+        expect(doc.css('.tabbed-set label').text).to eq 'Tab Name'
       end
     end
   end
