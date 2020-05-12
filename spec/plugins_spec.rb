@@ -12,7 +12,7 @@ RSpec.describe 'mkdocs plugins' do
   let(:plugin_dir) { File.expand_path(File.join(__dir__, '..', 'mkdocs-jinja2')) }
 
   context 'with jinja2 support' do
-    def create_docs(additional_config = {})
+    def create_docs(plugins)
       system("mkdocs new #{output_dir}")
       File.write(File.join(output_dir, 'requirements.txt'), <<-REQUIREMENTS)
       file://#{plugin_dir}?egg=mkdocs-jinja2")
@@ -20,7 +20,7 @@ RSpec.describe 'mkdocs plugins' do
       REQUIREMENTS
       config_file = File.join(output_dir, 'mkdocs.yml')
       config = YAML.load_file(config_file)
-      config['plugins'] ||= [{ 'jinja2' => additional_config }]
+      config['plugins'] = plugins
       config['use_directory_urls'] = false
       config['markdown_extensions'] = ['pymdownx.superfences']
       File.write(config_file, YAML.dump(config))
@@ -47,7 +47,7 @@ RSpec.describe 'mkdocs plugins' do
     end
 
     it 'supports includes using the file system docs/ as the base lookup path' do
-      create_docs
+      create_docs(['jinja2' => {}])
 
       write_doc 'test.md', "a header: {% include 'header1.md' %}"
       write_doc 'header1.md', 'appears'
@@ -65,11 +65,11 @@ RSpec.describe 'mkdocs plugins' do
       let(:repo_dir) { Dir.mktmpdir }
 
       it 'supports code snippets from another directory' do
-        create_docs(
-          'dependent_sections' => {
-            'repo-name' => repo_dir
-          }
-        )
+        create_docs(['jinja2' => {
+                      'dependent_sections' => {
+                        'repo-name' => repo_dir
+                      }
+                    }])
 
         Dir.chdir(repo_dir) do
           system('git init')
@@ -89,11 +89,11 @@ RSpec.describe 'mkdocs plugins' do
       end
 
       it 'removes the tags of any nested code snippets' do
-        create_docs(
-          'dependent_sections' => {
-            'repo-name' => repo_dir
-          }
-        )
+        create_docs(['jinja2' => {
+                      'dependent_sections' => {
+                        'repo-name' => repo_dir
+                      }
+                    }])
 
         Dir.chdir(repo_dir) do
           system('git init')
@@ -117,11 +117,11 @@ RSpec.describe 'mkdocs plugins' do
       end
 
       it 'dedents blocks to the left' do
-        create_docs(
-            'dependent_sections' => {
-                'repo-name' => repo_dir
-            }
-        )
+        create_docs(['jinja2' => {
+                      'dependent_sections' => {
+                        'repo-name' => repo_dir
+                      }
+                    }])
 
         Dir.chdir(repo_dir) do
           system('git init')
@@ -141,11 +141,11 @@ RSpec.describe 'mkdocs plugins' do
       end
 
       it 'supports tabbing' do
-        create_docs(
-          'dependent_sections' => {
-            'repo-name' => repo_dir
-          }
-        )
+        create_docs(['jinja2' => {
+                      'dependent_sections' => {
+                        'repo-name' => repo_dir
+                      }
+                    }])
 
         Dir.chdir(repo_dir) do
           system('git init')
