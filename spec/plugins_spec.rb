@@ -9,20 +9,21 @@ RSpec.describe 'mkdocs plugins' do
   let(:output_dir) { Dir.mktmpdir }
   let(:docs_dir) { File.join(output_dir, 'docs') }
   let(:site_dir) { File.join(output_dir, 'site') }
-  let(:plugin_dir) { File.expand_path(File.join(__dir__, '..', 'mkdocs-jinja2')) }
+  let(:plugin_dir) { File.expand_path(File.join(__dir__, '..')) }
 
   context 'with jinja2 support' do
-    def create_docs(plugins)
+    def create_docs(plugins = [], markdown_extensions = ['pymdownx.superfences'])
       system("mkdocs new #{output_dir}")
-      File.write(File.join(output_dir, 'requirements.txt'), <<-REQUIREMENTS)
-      file://#{plugin_dir}?egg=mkdocs-jinja2")
-      pyramid_jinja2
+      File.write(File.join(output_dir, 'requirements.txt'), <<~REQUIREMENTS)
+        file://#{plugin_dir}/mkdocs-jinja2?egg=mkdocs-jinja2
+        file://#{plugin_dir}/markdown-code-excerpt?egg=markdown-code-excerpt
+        pyramid_jinja2
       REQUIREMENTS
       config_file = File.join(output_dir, 'mkdocs.yml')
       config = YAML.load_file(config_file)
       config['plugins'] = plugins
       config['use_directory_urls'] = false
-      config['markdown_extensions'] = ['pymdownx.superfences']
+      config['markdown_extensions'] = markdown_extensions
       File.write(config_file, YAML.dump(config))
     end
 
@@ -59,6 +60,38 @@ RSpec.describe 'mkdocs plugins' do
 
       expect(read_doc('test.html')).to include 'a header: appears'
       expect(read_doc('testing/test.html')).to include 'a header: appears again'
+    end
+
+    context 'with code excerpts' do
+      let(:repo_dir) { Dir.mktmpdir }
+
+      it 'handle excerpts with indentation' do
+        create_docs([],
+                    ['pymdownx.superfences', {
+                      'markdown-code-excerpt' => {
+                        'sections' => {
+                          'repo-name' => repo_dir
+                        }
+                      }
+                    }])
+
+        Dir.chdir(repo_dir) do
+          system('git init')
+          File.write('testing.go', <<-SNIPPET)
+              # code_snippet snippet-name start yaml
+              some: yaml
+              another: yaml
+              # code_snippet snippet-name end
+          SNIPPET
+          system('git add -A && git commit -mok')
+        end
+
+        write_doc 'test.md', "code here:\n    ---excerpt--- 'repo-name/snippet-name'\nsome extra copy to ensure newlines"
+        create_site
+
+        doc = Nokogiri::HTML(read_doc('test.html'))
+        expect(doc.css('.highlight').text).to eq "some: yaml\nanother: yaml\n"
+      end
     end
 
     context 'with code snippets' do
