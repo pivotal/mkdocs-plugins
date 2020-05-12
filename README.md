@@ -11,13 +11,18 @@
 
    ```
    git+https://github.com/pivotal/mkdocs-plugins.git#egg=mkdocs-jinja2&subdirectory=mkdocs-jinja2
+   git+https://github.com/pivotal/mkdocs-plugins.git#egg=markdown-code-excerpt&subdirectory=markdown-code-excerpt
    ```
    
-3. Add to the list of plugins in `mkdocs.yml`
+3. Add to the list of plugins and markdown extensions in `mkdocs.yml`
 
    ```yaml
    plugins:
    - jinja2: {}
+   markdown_extensions:
+   - markdown-code-excerpt:
+       sections:
+         namespace: directory-to-look-for-code-snippets
    ```
   
 4. Enjoy with `mkdocs serve`.
