@@ -86,7 +86,7 @@ class ExcerptPreprocessor(Preprocessor):
                 return syntax, contents
 
             raise Exception(
-                'could not find code snippet "%s" under repo "%s" -- please check for "rg" or entry in ".gitignore"' % (
+                'could not find code excerpt "%s" under repo "%s" -- please check for "rg" or entry in ".gitignore"' % (
                     excerpt_name, repo_name))
         else:
             raise Exception('dependent section "%s" not defined in mkdocs.yml' % (repo_name))
